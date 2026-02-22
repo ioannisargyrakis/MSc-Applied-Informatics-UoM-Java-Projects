@@ -1,0 +1,93 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Σύνδεση</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Σύνδεση</h2>
+        
+        <form id="loginForm">
+			<label> ΑΦΜ: <input type="text" id="afm" inputmode="numeric" required> </label>
+            <label> Password: <input type="password" id="password" required> </label>
+            <button type="submit">Είσοδος</button>
+			<button onclick="location.href='citizenRegister.html'">Εγγραφή Πολίτη</button> 
+			<button onclick="location.href='storeRegister.html'">Εγγραφή Καταστήματος</button>
+        </form>
+
+    </div>
+	
+	<script> 
+	
+	$("#loginForm").submit(function(event) { 
+		event.preventDefault(); 
+		var loginData = { 
+			afm: $("#afm").val(), 
+			password: $("#password").val() 
+		}; $.ajax({ 
+			url: "http://localhost:8080/login", 
+			method: "POST", 
+			contentType: "application/json", 
+			data: JSON.stringify(loginData), 
+			success: function(response) { 
+			    
+			    alert(response.message); 
+			    
+			    if (response.role === 'citizen') {
+			        
+			        window.location.href = "citizenLandingPage.html?citizenAfm=" + response.afm; 
+			    } else if (response.role === 'store') {
+			        
+			        window.location.href = "storeLandingPage.html?storeAfm=" + response.afm; 
+			    }
+			},
+			error: function(xhr) { 
+				alert("Αποτυχία σύνδεσης: " + xhr.responseText); 
+			} 
+		}); 
+	}); 
+	function addStore() { 
+		var storeData = { 
+			"afm": parseInt(document.getElementById("afm").value), 
+			"shopName": document.getElementById("shopName").value, 
+			"owner": document.getElementById("owner").value, 
+			"password": document.getElementById("password").value 
+		};
+		var settings = { 
+			"url": "http://localhost:8080/storeRegister", 
+			"method": "POST", 
+			"timeout": 0, "headers": { 
+				"Content-Type": "application/json" 
+			}, 
+			"data": JSON.stringify(storeData) 
+		}; 
+		
+		$.ajax(settings).done(function (response) { 
+			alert(response); 
+			window.location.href = "login.html"; 
+		}).fail(function (jqXHR) { 
+			alert("Σφάλμα: " + jqXHR.responseText); 
+		}); 
+		
+		$.ajax(settings).done(function(response) {
+		    // Redirect based on user type
+		    if (response.role === 'store') {
+		   	 	window.location.href = 'storeLandingPage.html?storeAfm=' + afm;
+		    } else if (response.role === 'citizen') {
+		    	window.location.href = 'citizenLandingPage.html?citizenAfm=' + afm;
+		    } else {
+		    	alert("Λάθος ΑΦΜ ή κωδικός");
+	       }
+		}).fail(function(jqXHR) {
+		    alert("Λάθος ΑΦΜ ή κωδικός");
+		});
+	} 
+</script>
+
+</body>
+</html>
